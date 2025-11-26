@@ -42,31 +42,7 @@ class AdminController extends Controller
         return ApiHelper::success(null, UserResource::collection($users));
     }
 
-    #[OA\Post(
-        path: "/api/admin/verify-user/{id}",
-        summary: "Verify a user",
-        tags: ["Admin"],
-        security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(
-                name: "id",
-                in: "path",
-                required: true,
-                schema: new OA\Schema(type: "integer")
-            )
-        ],
-        responses: [
-            new OA\Response(
-                response: Response::HTTP_OK,
-                description: "User verified",
-                content: [
-                    "application/json" => new OA\MediaType(
-                        schema: new OA\Schema(ref: "#/components/schemas/UserResource")
-                    )
-                ]
-            )
-        ]
-    )]
+
     public function verifyUser($id)
     {
         $user = User::findOrFail($id);
@@ -76,31 +52,7 @@ class AdminController extends Controller
         return ApiHelper::success("User verified", new UserResource($user));
     }
 
-    #[OA\Post(
-        path: "/api/admin/reject-user/{id}",
-        summary: "Reject a user",
-        tags: ["Admin"],
-        security: [["bearerAuth" => []]],
-        parameters: [
-            new OA\Parameter(
-                name: "id",
-                in: "path",
-                required: true,
-                schema: new OA\Schema(type: "integer")
-            )
-        ],
-        responses: [
-            new OA\Response(
-                response: Response::HTTP_OK,
-                description: "User rejected",
-                content: [
-                    "application/json" => new OA\MediaType(
-                        schema: new OA\Schema(ref: "#/components/schemas/UserResource")
-                    )
-                ]
-            )
-        ]
-    )]
+
     public function rejectUser($id)
     {
         $user = User::findOrFail($id);
