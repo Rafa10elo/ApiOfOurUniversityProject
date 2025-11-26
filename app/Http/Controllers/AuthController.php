@@ -109,8 +109,8 @@ class AuthController extends Controller
     public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
-
-        if (!$token = auth()->attempt($credentials)) {
+        $token = JWTAuth::attempt($credentials);
+        if (!$token) {
             return ApiHelper::error("Invalid phone or password", 401);
         }
 
