@@ -8,12 +8,14 @@ use App\Models\User;
 use App\Http\Resources\UserResource;
 use App\Helpers\ApiHelper;
 use Tymon\JWTAuth\Facades\JWTAuth;
-use OpenApi\Attributes as OA;
-use Symfony\Component\HttpFoundation\Response;
+use Dedoc\Scramble\Attributes\Authenticated;
+
 
 class AuthController extends Controller
 {
-
+    /**
+     * @unauthenticated
+     */
     public function register(RegisterRequest $request)
     {
         $data = $request->validated();
@@ -37,7 +39,9 @@ class AuthController extends Controller
             "user"  => new UserResource($user)
         ]);
     }
-
+    /**
+     * @unauthenticated
+     */
     public function login(LoginRequest $request)
     {
         $credentials = $request->validated();
@@ -52,24 +56,7 @@ class AuthController extends Controller
         ]);
     }
 
-    #[OA\Get(
-        path: "/api/auth/me",
-        summary: "Fetch authenticated user",
-        tags: ["Auth"],
-        security: [["bearerAuth" => []]],
-        responses: [
-            new OA\Response(
-                response: Response::HTTP_OK,
-                description: "Authenticated user data",
-                content: [
-                    "application/json" => new OA\MediaType(
-                        schema: new OA\Schema(ref: "#/components/schemas/UserResource")
-                    )
-                ]
-            ),
-            new OA\Response(response: Response::HTTP_UNAUTHORIZED, description: "Unauthorized")
-        ]
-    )]
+    #[Authenticated]
     public function me()
     {
         return ApiHelper::success(null, new UserResource(auth()->user()));
