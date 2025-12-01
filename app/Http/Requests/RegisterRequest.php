@@ -28,6 +28,7 @@ class RegisterRequest extends FormRequest
             'password' => 'required|min:6',
             'birth_date' => 'required|date',
             'profile_image' => 'required|image',
+            'role' => 'required|in:owner,renter',
             'id_image' => 'required|image',
         ];
     }

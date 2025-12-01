@@ -9,18 +9,23 @@ class UserResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
-        return [
+        $isAdmin = auth()->check() && auth()->user()->role === 'admin';
+
+        $base = [
             'id' => $this->id,
             'first_name' => $this->first_name,
             'last_name'  => $this->last_name,
             'phone' => $this->phone,
             'birth_date' => $this->birth_date,
             'verification_state' => $this->verification_state,
-
-            'profile_image' => $this->getFirstMediaUrl('profile_image'),
-            'id_image' => $this->getFirstMediaUrl('id_image'),
-
-            'created_at' => $this->created_at?->toDateTimeString(),
         ];
+
+        if ($isAdmin) {
+            $base['created_at'] = $this->created_at;
+            $base['updated_at'] = $this->updated_at;
+            $base['role'] = $this->role;
+        }
+
+        return $base;
     }
 }

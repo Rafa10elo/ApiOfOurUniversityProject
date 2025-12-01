@@ -26,7 +26,8 @@ class AuthController extends Controller
             'phone'      => $data['phone'],
             'birth_date' => $data['birth_date'],
             'password'   => bcrypt($data['password']),
-            'verification_state' => 'pending'
+            'verification_state' => 'pending',
+            'role' => $data->role
         ]);
 
         ApiHelper::saveMedia($user, $request->file('profile_image'), 'profile_image');
@@ -56,7 +57,7 @@ class AuthController extends Controller
         ]);
     }
 
-    #[Authenticated]
+
     public function me()
     {
         return ApiHelper::success(null, new UserResource(auth()->user()));

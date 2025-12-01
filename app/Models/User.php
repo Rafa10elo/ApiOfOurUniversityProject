@@ -12,7 +12,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class User extends Authenticatable implements JWTSubject, HasMedia
 {
-    use InteractsWithMedia;
+    use InteractsWithMedia, Notifiable;
 
     protected $fillable = [
         'first_name',
@@ -20,8 +20,15 @@ class User extends Authenticatable implements JWTSubject, HasMedia
         'phone',
         'birth_date',
         'verification_state',
+        'role',
         'password',
     ];
+
+    public function apartments()
+    {
+        return $this->hasMany(Apartment::class, 'owner_id');
+    }
+
 
     public function registerMediaCollections(): void
     {
@@ -32,6 +39,10 @@ class User extends Authenticatable implements JWTSubject, HasMedia
     public function getJWTIdentifier()
     {
         return $this->getKey();
+    }
+    public function getId()
+    {
+        return $this->id;
     }
 
     public function getJWTCustomClaims(): array
