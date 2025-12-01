@@ -19,7 +19,7 @@ Route::get('/apartments', [ApartmentController::class, 'index']);
 Route::get('/apartments/{id}', [ApartmentController::class, 'show']);
 
 /*
-| Authenticated Routes
+Authenticated Routes
 */
 Route::middleware(['jwt.auth'])->group(function () {
 

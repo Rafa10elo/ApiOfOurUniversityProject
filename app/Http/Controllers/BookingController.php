@@ -12,9 +12,7 @@ use Illuminate\Http\Request;
 
 class BookingController extends Controller
 {
-    /**
-     * Create new booking request
-     */
+
     public function store(StoreBookingRequest $request, $apartmentId)
     {
         $data = $request->validated();

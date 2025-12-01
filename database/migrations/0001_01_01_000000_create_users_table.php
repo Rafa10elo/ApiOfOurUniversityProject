@@ -19,7 +19,7 @@ return new class extends Migration
             $table->enum('verification_state', ['pending', 'verified', 'rejected'])->default('pending');
             $table->date('birth_date')->nullable();
             $table->string('password');
-            $table->enum('role', ['admin', 'renter', 'owner'])->default('renter');
+            $table->enum('role', ['admin', 'renter', 'owner']);
             $table->rememberToken();
             $table->timestamps();
         });

@@ -7,7 +7,6 @@ use App\Http\Resources\UserResource;
 use App\Helpers\ApiHelper;
 use Dedoc\Scramble\Attributes\Authenticated;
 
-#[Authenticated]
 class AdminController extends Controller
 {
 
