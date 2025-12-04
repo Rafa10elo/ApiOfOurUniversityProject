@@ -145,4 +145,33 @@ class BookingController extends Controller
 
         return ApiHelper::success("Booking updated", new \App\Http\Resources\BookingResource($booking));
     }
+
+
+    public function pendingForOwner()
+    {
+        $bookings = Booking::whereHas('apartment', function ($q) {
+            $q->where('owner_id', auth()->id());
+        })
+            ->where('status', 'pending')
+            ->with(['apartment', 'user'])
+            ->latest()
+            ->get();
+        return ApiHelper::success("Pending bookings", BookingResource::collection($bookings));
+    }
+
+
+
+    public function myBookings()
+    {
+        $bookings = Booking::where('user_id', auth()->id())
+            ->with('apartment')
+            ->latest()
+            ->get();
+
+        return ApiHelper::success("My bookings", BookingResource::collection($bookings));
+    }
+
 }
+
+
+

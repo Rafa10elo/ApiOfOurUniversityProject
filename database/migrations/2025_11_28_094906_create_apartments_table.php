@@ -19,7 +19,10 @@ return new class extends Migration
              $table->integer('price');
              $table->string('city');
             $table->string('governorate');
-          $table->integer('rooms');
+          $table->integer('bedrooms');
+            $table->integer('livingrooms');
+            $table->integer('bathrooms');
+
             $table->timestamps();
         });
     }

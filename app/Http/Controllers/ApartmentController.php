@@ -24,15 +24,15 @@ class ApartmentController extends Controller
                 ApiHelper::saveMedia($apartment, $img, 'apartment_images');
             }
         }
-
-        $apartment->load('owner');
-
+        $apartment->load(['owner', 'reviews']);
         return ApiHelper::success('Apartment created', new ApartmentResource($apartment), 201);
     }
 
-    public function update(UpdateApartmentRequest $request,  $id)
+
+    public function update(UpdateApartmentRequest $request, $id)
     {
         $apartment = Apartment::findOrFail($id);
+
         if ($apartment->owner_id !== auth()->id())
             return ApiHelper::error("Not authorized", 403);
 
@@ -41,12 +41,13 @@ class ApartmentController extends Controller
 
         if ($request->hasFile('images')) {
             $apartment->clearMediaCollection('apartment_images');
-            foreach ($request->file('images') as $img) {
+            foreach ($request->file('images') as $img)
                 ApiHelper::saveMedia($apartment, $img, 'apartment_images');
-            }
+
         }
 
-        $apartment->load('owner');
+        $apartment->load(['owner', 'reviews']);
+
 
         return ApiHelper::success('Apartment updated', new ApartmentResource($apartment));
     }
@@ -55,14 +56,13 @@ class ApartmentController extends Controller
     {
         $apartment = Apartment::findOrFail($id);
 
-        if ($apartment->owner_id !== auth()->id()) {
-            return ApiHelper::error("Not authorized", 403);
-        }
+        if ($apartment->owner_id !== auth()->id())
+          return ApiHelper::error("Not authorized", 403);
 
         $apartment->delete();
-
         return ApiHelper::success("Apartment deleted");
     }
+
     /**
      * @unauthenticated
      */
@@ -74,18 +74,17 @@ class ApartmentController extends Controller
         if ($request->governorate) $query->where('governorate', $request->governorate);
         if ($request->min_price) $query->where('price', '>=', $request->min_price);
         if ($request->max_price) $query->where('price', '<=', $request->max_price);
-        if ($request->rooms) $query->where('rooms', $request->rooms);
-
-        $apartments = $query->with('owner')->paginate(10);
+        $apartments = $query->with(['owner', 'reviews'])->paginate(10);
 
         return ApiHelper::success("Apartments list", ApartmentResource::collection($apartments));
     }
+
     /**
      * @unauthenticated
      */
     public function show($id)
     {
-        $apartment = Apartment::with(['owner', 'bookings'])->findOrFail($id);
+        $apartment = Apartment::with(['owner', 'bookings', 'reviews.user'])->findOrFail($id);
 
         return ApiHelper::success("Apartment details", new ApartmentResource($apartment));
     }

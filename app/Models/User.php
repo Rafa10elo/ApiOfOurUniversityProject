@@ -28,6 +28,15 @@ class User extends Authenticatable implements JWTSubject, HasMedia
     {
         return $this->hasMany(Apartment::class, 'owner_id');
     }
+    public function favorites()
+    {
+        return $this->belongsToMany(Apartment::class, 'favorites')->withTimestamps();
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
 
 
     public function registerMediaCollections(): void

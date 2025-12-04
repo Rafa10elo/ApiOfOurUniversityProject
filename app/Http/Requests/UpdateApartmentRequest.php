@@ -27,9 +27,12 @@ class UpdateApartmentRequest extends FormRequest
             'price' => 'sometimes|numeric|min:1',
             'city' => 'sometimes|string',
             'governorate' => 'sometimes|string',
-            'rooms' => 'sometimes|integer|min:1',
-
+            'bedrooms' => 'sometimes|integer|min:0',
+            'livingrooms' => 'sometimes|integer|min:0',
+            'bathrooms' => 'sometimes|integer|min:0',
+            'images.*' => 'sometimes|image|max:2048',
         ];
     }
+
 
 }
