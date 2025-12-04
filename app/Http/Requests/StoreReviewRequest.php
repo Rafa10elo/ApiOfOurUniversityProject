@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-namespace App\Http\Requests;
 
 class StoreReviewRequest extends FormRequest
 {
@@ -23,7 +22,6 @@ class StoreReviewRequest extends FormRequest
             'bedrooms' => 'required|integer|min:0',
             'livingrooms' => 'required|integer|min:0',
             'bathrooms' => 'required|integer|min:0',
-            'images.*' => 'image|max:2048', // optional for media
         ];
     }
 
