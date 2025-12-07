@@ -23,8 +23,7 @@ class ApartmentResource extends JsonResource
             'total_rooms' => ($this->bedrooms ?? 0) + ($this->livingrooms ?? 0) + ($this->bathrooms ?? 0),
             'average_rating' => (float) optional($this->reviews)->avg('rating') ?? 0,
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
-            'created_at' => $this->created_at,
-            'updated_at' => $this->updated_at,
+
         ];
     }
 }

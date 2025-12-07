@@ -74,7 +74,7 @@ class BookingController extends Controller
             ->exists();
 
         if ($conflict) {
-            return ApiHelper::error("This booking conflicts with an existing approved booking", 409);
+            return ApiHelper::error("This booking conflicts with an existing approved booking", 410);
         }
 
         $booking->update(['status' => 'approved']);

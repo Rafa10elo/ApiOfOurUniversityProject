@@ -25,6 +25,9 @@ class ReviewController extends Controller
         return ApiHelper::success("Review submitted", new ReviewResource($review), 201);
     }
 
+    /**
+     * @unauthenticated
+     */
     public function index($apartmentId)
     {
         $apartment = Apartment::with('reviews.user')->findOrFail($apartmentId);

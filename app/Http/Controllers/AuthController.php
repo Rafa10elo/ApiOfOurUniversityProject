@@ -27,7 +27,7 @@ class AuthController extends Controller
             'birth_date' => $data['birth_date'],
             'password'   => bcrypt($data['password']),
             'verification_state' => 'pending',
-            'role' => $data->role
+            'role' => $data['role']
         ]);
 
         ApiHelper::saveMedia($user, $request->file('profile_image'), 'profile_image');
