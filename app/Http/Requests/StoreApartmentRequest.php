@@ -6,29 +6,25 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreApartmentRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
             'price' => 'required|numeric|min:1',
-            'city' => 'required|string',
-            'governorate' => 'required|string',
-            'rooms' => 'required|integer|min:1',
+            'city' => 'required|string|max:255',
+            'governorate' => 'required|string|max:255',
+
+            'bedrooms' => 'required|integer|min:0',
+            'livingrooms' => 'required|integer|min:0',
+            'bathrooms' => 'required|integer|min:0',
+            'space' => 'required|numeric|min:1',
+            'totalRooms' => 'required|integer|min:1',
+
+            'images.*' => 'nullable|image|max:2048',
         ];
     }
-
 }
