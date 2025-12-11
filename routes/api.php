@@ -73,5 +73,5 @@ Route::prefix('admin')->middleware(['jwt.auth', 'role:admin'])->group(function (
 
     Route::get('/users/pending', [AdminController::class,'pendingUsers']);
     Route::post('/users/{id}/verify', [AdminController::class,'verifyUser']);
-    Route::post('/users/{id}/reject', [AdminController::class,'rejectUser']);
+   Route::post('/users/{id}/reject', [AdminController::class,'rejectUser']);
 });
