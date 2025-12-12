@@ -19,7 +19,7 @@ class ApartmentResource extends JsonResource
             'bathrooms' => $this->bathrooms,
             'space' => $this->space,
             'total_rooms' => $this->totalRooms,
-            'average_rating' => (float) optional($this->reviews)->avg('rating') ?? 0,
+            'average_rating' => (float) ($this->reviews_avg_rating ?? 0),
             'reviews' => ReviewResource::collection($this->whenLoaded('reviews')),
             'images' => $this->getMedia('apartment_images')->map(function ($media) {
                 return $media->getUrl();

@@ -11,6 +11,17 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\NotificationController;
 
 
+Route::post('/broadcasting/auth', function (Illuminate\Http\Request $request) {
+
+    $user = auth('api')->user();
+
+    if (! $user) {
+        return response()->json(['message' => 'Unauthenticated'], 401);
+    }
+
+    return Broadcast::auth($request);
+})->middleware('jwt.auth');
+
 /*
  Public Routes
 */
@@ -18,6 +29,7 @@ Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 
 Route::get('/apartments', [ApartmentController::class, 'index']);
+Route::get('/apartments/top-rated', [ApartmentController::class, 'topRated']);
 Route::get('/apartments/{id}', [ApartmentController::class, 'show']);
 Route::get('/apartments/{apartmentId}/reviews', [ReviewController::class, 'index']);
 
@@ -62,7 +74,7 @@ Renter Routes
 Route::middleware(['jwt.auth', 'role:renter'])->group(function () {
 
     Route::post('/bookings/{apartmentId}', [BookingController::class, 'store']);
-    Route::get('/bookings/my', [BookingController::class, 'myBookings']);
+  Route::get('/bookings/my', [BookingController::class, 'myBookings']);
 
 });
 

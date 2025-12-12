@@ -8,21 +8,14 @@ class StoreReviewRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return auth()->check();
     }
 
     public function rules(): array
     {
         return [
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'price' => 'required|numeric|min:1',
-            'city' => 'required|string',
-            'governorate' => 'required|string',
-            'bedrooms' => 'required|integer|min:0',
-            'livingrooms' => 'required|integer|min:0',
-            'bathrooms' => 'required|integer|min:0',
+            'rating'       => 'required|integer|min:1|max:5',
+            'comment'      => 'nullable|string|max:1000',
         ];
     }
-
 }

@@ -86,6 +86,23 @@ class ApartmentController extends Controller
     {
         $apartment = Apartment::with(['owner', 'bookings', 'reviews.user'])->findOrFail($id);
 
-        return ApiHelper::success("Apartment details", new ApartmentResource($apartment));
+      return ApiHelper::success("Apartment details", new ApartmentResource($apartment));
     }
+    /**
+     * @unauthenticated
+     */
+    public function topRated(Request $request)
+    {
+        $apartments = Apartment::withAvg('reviews', 'rating')
+        ->with(['owner', 'reviews'])
+        ->orderByDesc('reviews_avg_rating')
+        ->paginate($request->get('per_page', 10));
+
+        return ApiHelper::success(
+            "Top rated apartments",
+            ApartmentResource::collection($apartments)
+        );
+    }
+
+
 }
