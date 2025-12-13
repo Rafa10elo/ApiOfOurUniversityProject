@@ -62,4 +62,32 @@ class AuthController extends Controller
     {
         return ApiHelper::success(null, new UserResource(auth()->user()));
     }
+
+    public function deleteAccount(){
+
+        $user = auth()->user();
+
+        JWTAuth::invalidate(JWTAuth::getToken());
+        ApiHelper::deleteMedia($user, 'profile_image');
+      ApiHelper::deleteMedia($user, 'id_image');
+
+        $user->delete();
+
+        return ApiHelper::success("account deleted successfully");
+    }
+
+    public function logout()
+    {
+
+        JWTAuth::invalidate(JWTAuth::getToken());
+
+
+      return ApiHelper::success("logged out sucessfully");
+    }
+
+
+
+
+
+
 }

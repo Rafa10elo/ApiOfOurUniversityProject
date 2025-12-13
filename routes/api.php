@@ -39,6 +39,10 @@ Authenticated Routes
 Route::middleware(['jwt.auth'])->group(function () {
 
     Route::get('/auth/me', [AuthController::class, 'me']);
+    Route::post('/auth/logout', [AuthController::class, 'logout']);
+    Route::delete('/auth/delete-account', [AuthController::class, 'deleteAccount']);
+
+
 
     Route::post('/profile/image', [EditProfileController::class, 'updateProfileImage']);
     Route::post('/profile/password', [EditProfileController::class, 'updatePassword']);
