@@ -28,4 +28,16 @@ class FavoriteController extends Controller
 
         return ApiHelper::success("Favorites list", $favorites);
     }
+
+    public function isFavorited($apartmentId)
+    {
+        $user = auth()->user();
+
+       if ($user->favorites()->where('apartment_id', $apartmentId)->exists()){
+           return ApiHelper::success("This apartment is favorited ",true);
+       }
+
+
+       return ApiHelper::success("This apartment is not favorited ",false);
+    }
 }

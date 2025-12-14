@@ -52,6 +52,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 
     Route::post('/favorites/{apartmentId}', [FavoriteController::class, 'toggle']);
     Route::get('/favorites', [FavoriteController::class, 'myFavorites']);
+    Route::get('/favorites/{apartmentId}/status', [FavoriteController::class, 'isFavorited']);
 
     Route::post('/apartments/{apartmentId}/reviews', [ReviewController::class, 'store']);
 
