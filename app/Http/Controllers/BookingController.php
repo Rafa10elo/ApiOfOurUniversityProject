@@ -8,7 +8,7 @@ use App\Http\Requests\UpdateBookingRequest;
 use App\Http\Resources\BookingResource;
 use App\Models\Apartment;
 use App\Models\Booking;
-use Illuminate\Http\Request;
+
 
 class BookingController extends Controller
 {
@@ -44,6 +44,8 @@ class BookingController extends Controller
             'apartment_id' => $apartmentId,
             'start_date'   => $request->start_date,
             'end_date'     => $request->end_date,
+            'status' => 'pending',
+
         ]);
 
         $apartment->owner->notify(new \App\Notifications\NewBookingNotification($booking));
@@ -146,30 +148,135 @@ class BookingController extends Controller
         return ApiHelper::success("Booking updated", new \App\Http\Resources\BookingResource($booking));
     }
 
-
-    public function pendingForOwner()
+    public function ownerPending()
     {
-        $bookings = Booking::whereHas('apartment', function ($q) {
-            $q->where('owner_id', auth()->id());
-        })
-            ->where('status', 'pending')
-            ->with(['apartment', 'user'])
-            ->latest()
+        $bookings = Booking::whereHas('apartment', fn($q) =>
+        $q->where('owner_id', auth()->id())
+        )->where('status', 'pending')->get();
+
+        return ApiHelper::success(
+            "Owner pending bookings",
+            BookingResource::collection($bookings)
+        );
+    }
+
+    public function ownerApproved()
+    {
+        $bookings = Booking::whereHas('apartment', fn($q) =>
+        $q->where('owner_id', auth()->id())
+        )->where('status', 'approved')
+            ->where('end_date', '>=', date('Y-m-d'))
             ->get();
-        return ApiHelper::success("Pending bookings", BookingResource::collection($bookings));
+
+        return ApiHelper::success(
+            "Owner active bookings",
+            BookingResource::collection($bookings)
+        );
+    }
+
+    public function ownerCancelled()
+    {
+        $bookings = Booking::whereHas('apartment', fn($q) =>
+        $q->where('owner_id', auth()->id())
+        )->whereIn('status', ['cancelled','rejected'])->get();
+
+        return ApiHelper::success(
+            "Owner cancelled bookings",
+            BookingResource::collection($bookings)
+        );
+    }
+
+    public function ownerPast()
+    {
+        $bookings = Booking::whereHas('apartment', fn($q) =>
+        $q->where('owner_id', auth()->id())
+         )->where('status','approved')
+             ->where('end_date','<',date('Y-m-d'))
+            ->get();
+
+        return ApiHelper::success(
+            "Owner past bookings",
+              BookingResource::collection($bookings)
+        );
     }
 
 
 
-    public function myBookings()
+    public function renterPending()
     {
         $bookings = Booking::where('user_id', auth()->id())
-            ->with('apartment')
-            ->latest()
+            ->where('status','pending')->get();
+
+            return ApiHelper::success(
+            "My pending bookings",
+            BookingResource::collection($bookings)
+        );
+    }
+
+    public function renterApproved()
+    {
+        $bookings = Booking::where('user_id', auth()->id())
+            ->where('status','approved')
+            ->where('end_date','>=',date('Y-m-d'))
             ->get();
 
-        return ApiHelper::success("My bookings", BookingResource::collection($bookings));
+           return ApiHelper::success(
+            "My active bookings",
+            BookingResource::collection($bookings)
+        );
     }
+
+    public function renterCancelled()
+    {
+        $bookings = Booking::where('user_id', auth()->id())
+            ->whereIn('status',['cancelled','rejected'])->get();
+
+        return ApiHelper::success(
+            "My cancelled bookings",
+            BookingResource::collection($bookings)
+        );
+    }
+
+    public function renterPast()
+    {
+        $bookings = Booking::where('user_id', auth()->id())
+            ->where('status','approved')
+          ->where('end_date','<',date('Y-m-d'))
+            ->get();
+
+          return ApiHelper::success(
+            "My past bookings",
+            BookingResource::collection($bookings)
+        );
+    }
+
+
+
+    public function apartmentCalendar($apartmentId)
+    {
+        $today = date('Y-m-d');
+
+        $bookings = Booking::where('apartment_id', $apartmentId)
+            ->select('start_date', 'end_date', 'status')
+            ->get()
+          ->map(function ($booking) use ($today) {
+                $type = $booking->status;
+
+                if ($booking->status === 'approved' && $booking->end_date < $today)
+                    $type = 'past';
+
+                return [
+                    'start_date' => $booking->start_date,
+                 'end_date'   => $booking->end_date,
+                    'status'     => $type,
+                ];
+            });
+
+        return ApiHelper::success(
+            "Apartment calendar",$bookings
+        );
+    }
+
 
 }
 

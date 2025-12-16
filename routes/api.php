@@ -10,7 +10,7 @@ use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\NotificationController;
 
-
+//reverb weow weow
 Route::post('/broadcasting/auth', function (Illuminate\Http\Request $request) {
 
     $user = auth('api')->user();
@@ -32,6 +32,7 @@ Route::get('/apartments', [ApartmentController::class, 'index']);
 Route::get('/apartments/top-rated', [ApartmentController::class, 'topRated']);
 Route::get('/apartments/{id}', [ApartmentController::class, 'show']);
 Route::get('/apartments/{apartmentId}/reviews', [ReviewController::class, 'index']);
+ Route::get('/apartments/{id}/calendar',[BookingController::class,'apartmentCalendar']);
 
 /*
 Authenticated Routes
@@ -69,18 +70,21 @@ Route::middleware(['jwt.auth', 'role:owner'])->group(function () {
 
     Route::post('/bookings/{id}/approve', [BookingController::class, 'approve']);
     Route::post('/bookings/{id}/reject', [BookingController::class, 'reject']);
-    Route::get('/bookings/pending', [BookingController::class, 'pendingForOwner']);
-
+    Route::get('/bookings/pending',[BookingController::class,'ownerPending']);
+    Route::get('/bookings/approved',[BookingController::class,'ownerApproved']);
+   Route::get('/bookings/cancelled',[BookingController::class,'ownerCancelled']);
+   Route::get('/bookings/past',[BookingController::class,'ownerPast']);
 });
 
 /*
 Renter Routes
 */
-Route::middleware(['jwt.auth', 'role:renter'])->group(function () {
-
+Route::middleware(['jwt.auth', 'role:renter'])->prefix("my")->group(function () {
     Route::post('/bookings/{apartmentId}', [BookingController::class, 'store']);
-  Route::get('/bookings/my', [BookingController::class, 'myBookings']);
-
+    Route::get('/bookings/pending',[BookingController::class,'renterPending']);
+    Route::get('/bookings/approved',[BookingController::class,'renterApproved']);
+   Route::get('/bookings/cancelled',[BookingController::class,'renterCancelled']);
+    Route::get('/bookings/past',[BookingController::class,'renterPast']);
 });
 
 /*
