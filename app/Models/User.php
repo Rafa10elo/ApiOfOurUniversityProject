@@ -13,6 +13,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 class User extends Authenticatable implements JWTSubject, HasMedia
 {
     use InteractsWithMedia, Notifiable;
+    use HasFactory;
 
     protected $fillable = [
         'first_name',
