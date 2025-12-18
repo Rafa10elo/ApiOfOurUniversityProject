@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminViewController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
@@ -87,12 +88,4 @@ Route::middleware(['jwt.auth', 'role:renter'])->prefix("my")->group(function () 
     Route::get('/bookings/past',[BookingController::class,'renterPast']);
 });
 
-/*
-Admin Routes
-*/
-Route::prefix('admin')->middleware(['jwt.auth', 'role:admin'])->group(function () {
 
-    Route::get('/users/pending', [AdminController::class,'pendingUsers']);
-    Route::post('/users/{id}/verify', [AdminController::class,'verifyUser']);
-   Route::post('/users/{id}/reject', [AdminController::class,'rejectUser']);
-});

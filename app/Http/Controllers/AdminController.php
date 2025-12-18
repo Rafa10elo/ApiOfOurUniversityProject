@@ -16,16 +16,16 @@ class AdminController extends Controller
         return ApiHelper::success(null, UserResource::collection($users));
     }
 
-
     public function verifyUser($id)
     {
         $user = User::findOrFail($id);
         $user->verification_state = 'verified';
         $user->save();
 
-        return ApiHelper::success("User verified", new UserResource($user));
+        return redirect()
+            ->back()
+            ->with('success', "User {$user->first_name} {$user->last_name} has been verified successfully.");
     }
-
 
     public function rejectUser($id)
     {
@@ -33,6 +33,18 @@ class AdminController extends Controller
         $user->verification_state = 'rejected';
         $user->save();
 
-        return ApiHelper::success("User rejected", new UserResource($user));
+        return redirect()
+            ->back()
+            ->with('error', "User {$user->first_name} {$user->last_name} has been rejected.");
     }
+    public function removeUser($id)
+    {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()
+            ->route('admin.verified')
+            ->with('success', 'User removed successfully');
+    }
+
 }
