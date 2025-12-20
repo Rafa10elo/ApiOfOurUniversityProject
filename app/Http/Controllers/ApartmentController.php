@@ -7,6 +7,7 @@ use App\Http\Requests\StoreApartmentRequest;
 use App\Http\Requests\UpdateApartmentRequest;
 use App\Http\Resources\ApartmentResource;
 use App\Models\Apartment;
+use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Http\Request;
 
 class ApartmentController extends Controller
@@ -63,6 +64,28 @@ class ApartmentController extends Controller
         return ApiHelper::success("Apartment deleted");
     }
 
+    #[QueryParameter(
+        name: 'city',
+        description: 'keyword search on city name',
+        example: 'damascus'
+    )]
+    #[QueryParameter(
+        name: 'governorate',
+        description: 'filter by governorate',
+        example: 'damascus'
+    )]
+    #[QueryParameter(
+        name: 'min_price',
+        description: 'minimum price',
+        type: 'int',
+        example: 300
+    )]
+    #[QueryParameter(
+        name: 'max_price',
+        description: 'maximum price',
+        type: 'int',
+        example: 800
+    )]
     /**
      * @unauthenticated
      */
@@ -70,14 +93,34 @@ class ApartmentController extends Controller
     {
         $query = Apartment::query();
 
-        if ($request->city) $query->where('city', $request->city);
-        if ($request->governorate) $query->where('governorate', $request->governorate);
-        if ($request->min_price) $query->where('price', '>=', $request->min_price);
-        if ($request->max_price) $query->where('price', '<=', $request->max_price);
-        $apartments = $query->with(['owner', 'reviews'])->paginate(10);
+        if ($request->filled('city')) {
+            $keyword = $request->city;
 
-        return ApiHelper::success("Apartments list", ApartmentResource::collection($apartments));
+            $query->where('city', 'LIKE', "%{$keyword}%");
+        }
+
+        if ($request->filled('governorate')) {
+            $query->where('governorate', $request->governorate);
+        }
+
+        if ($request->filled('min_price')) {
+            $query->where('price', '>=', $request->min_price);
+        }
+
+        if ($request->filled('max_price')) {
+            $query->where('price', '<=', $request->max_price);
+        }
+
+        $apartments = $query
+            ->with(['owner', 'reviews'])
+            ->paginate(10);
+
+        return ApiHelper::success(
+            "Apartments list",
+            ApartmentResource::collection($apartments)
+        );
     }
+
 
     /**
      * @unauthenticated
