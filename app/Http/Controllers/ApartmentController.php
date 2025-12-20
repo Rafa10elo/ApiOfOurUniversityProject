@@ -95,29 +95,23 @@ class ApartmentController extends Controller
 
         if ($request->filled('city')) {
             $keyword = $request->city;
-
             $query->where('city', 'LIKE', "%{$keyword}%");
         }
-
-        if ($request->filled('governorate')) {
+       if ($request->filled('governorate'))
             $query->where('governorate', $request->governorate);
-        }
 
-        if ($request->filled('min_price')) {
-            $query->where('price', '>=', $request->min_price);
-        }
 
-        if ($request->filled('max_price')) {
-            $query->where('price', '<=', $request->max_price);
-        }
+        if ($request->filled('min_price'))
+           $query->where('price', '>=', $request->min_price);
 
-        $apartments = $query
-            ->with(['owner', 'reviews'])
-            ->paginate(10);
 
-        return ApiHelper::success(
-            "Apartments list",
-            ApartmentResource::collection($apartments)
+         if ($request->filled('max_price'))
+          $query->where('price', '<=', $request->max_price);
+
+
+        $apartments = $query->with(['owner', 'reviews'])->paginate(10);
+
+        return ApiHelper::success("apartments list", ApartmentResource::collection($apartments)
         );
     }
 
