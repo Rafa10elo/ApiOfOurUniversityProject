@@ -9,7 +9,7 @@ class ReviewResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'user' => $this->user,
+            'user' => UserResource::make($this->whenLoaded('user')),
             'rating' => $this->rating,
             'comment' => $this->comment,
             'created_at' => $this->created_at,

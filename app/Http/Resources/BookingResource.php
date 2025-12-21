@@ -11,8 +11,8 @@ class BookingResource extends JsonResource
     {
         return [
             'id'         => $this->id,
-            'user'       => $this->user,
-            'apartment'  => $this->apartment,
+            'user'       => UserResource::make($this->whenLoaded('user')),
+            'apartment'  => ApartmentResource::make($this->whenLoaded('apartment')),
             'start_date' => $this->start_date,
             'end_date'   => $this->end_date,
             'status'     => $this->status,
