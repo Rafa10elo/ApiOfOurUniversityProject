@@ -86,6 +86,36 @@ class ApartmentController extends Controller
         type: 'int',
         example: 800
     )]
+    #[QueryParameter(
+        name: 'bedrooms',
+        description: 'bedrooms number',
+        type: 'int',
+        example: 4
+    )]
+    #[QueryParameter(
+        name: 'livingrooms',
+        description: 'livingrooms number',
+        type: 'int',
+        example: 1
+    )]
+    #[QueryParameter(
+        name: 'bathrooms',
+        description: 'bathrooms number',
+        type: 'int',
+        example: 2
+    )]
+    #[QueryParameter(
+        name: 'max_space',
+        description: 'maximum space',
+        type: 'int in meters',
+        example: 200
+    )]
+    #[QueryParameter(
+        name: 'min_space',
+        description: 'min space',
+        type: 'int in meters',
+        example: 10
+    )]
     /**
      * @unauthenticated
      */
@@ -107,6 +137,21 @@ class ApartmentController extends Controller
 
          if ($request->filled('max_price'))
           $query->where('price', '<=', $request->max_price);
+
+        if ($request->filled('bedrooms'))
+            $query->where('bedrooms', '=', $request->bedrooms);
+
+        if ($request->filled('livingrooms'))
+            $query->where('livingrooms', '=', $request->livingrooms);
+
+        if ($request->filled('bathrooms'))
+            $query->where('bathrooms', '=', $request->bathrooms);
+
+        if ($request->filled('max_space'))
+            $query->where('space', '<=', $request->max_space);
+
+        if ($request->filled('min_space'))
+            $query->where('space', '>=', $request->min_space);
 
 
         $apartments = $query->with(['owner', 'reviews'])->paginate(10);
