@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreApartmentRequest extends FormRequest
 {
@@ -11,12 +12,33 @@ class StoreApartmentRequest extends FormRequest
         return true;
     }
 
+
     public function rules(): array
     {
+        $governorates = [
+            'Damascus',
+            'Rif Dimashq',
+            'Aleppo',
+            'Homs',
+            'Hama',
+            'Latakia',
+            'Tartus',
+            'Idlib',
+            'Deir ez-Zor',
+            'Raqqa',
+            'Hasakah',
+            'Daraa',
+            'As-Suwayda',
+            'Quneitra',
+        ];
         return [
             'price' => 'required|numeric|min:1',
             'city' => 'required|string|max:255',
-            'governorate' => 'required|string|max:255',
+            'governorate' => [
+              'required',
+                'string',
+                Rule::in($governorates),
+            ],
 
             'bedrooms' => 'required|integer|min:0',
             'livingrooms' => 'required|integer|min:0',
@@ -27,4 +49,5 @@ class StoreApartmentRequest extends FormRequest
             'images.*' => 'nullable|image|max:2048',
         ];
     }
+
 }

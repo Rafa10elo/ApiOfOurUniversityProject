@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateApartmentRequest extends FormRequest
 {
@@ -11,20 +12,42 @@ class UpdateApartmentRequest extends FormRequest
         return true;
     }
 
+
     public function rules(): array
     {
+        $governorates = [
+            'Damascus',
+            'Rif Dimashq',
+            'Aleppo',
+            'Homs',
+            'Hama',
+            'Latakia',
+            'Tartus',
+            'Idlib',
+            'Deir ez-Zor',
+            'Raqqa',
+            'Hasakah',
+            'Daraa',
+            'As-Suwayda',
+            'Quneitra',
+        ];
+
         return [
-            'price' => 'sometimes|numeric|min:1',
-            'city' => 'sometimes|string|max:255',
-            'governorate' => 'sometimes|string|max:255',
+            'price' => 'required|numeric|min:1',
+            'city' => 'required|string|max:255',
+            'governorate' => [
+                'sometimes',
+               'string',
+            Rule::in($governorates),
+            ],
+            'bedrooms' => 'required|integer|min:0',
+            'livingrooms' => 'required|integer|min:0',
+            'bathrooms' => 'required|integer|min:0',
+            'space' => 'required|numeric|min:1',
+            'totalRooms' => 'required|integer|min:1',
 
-            'bedrooms' => 'sometimes|integer|min:0',
-            'livingrooms' => 'sometimes|integer|min:0',
-            'bathrooms' => 'sometimes|integer|min:0',
-            'space' => 'sometimes|numeric|min:1',
-            'totalRooms' => 'sometimes|integer|min:1',
-
-            'images.*' => 'sometimes|image|max:2048',
+            'images.*' => 'nullable|image|max:2048',
         ];
     }
+
 }
