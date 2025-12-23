@@ -88,3 +88,22 @@ Route::middleware(['jwt.auth', 'role:renter'])->prefix("my")->group(function () 
 });
 
 
+Route::get('/governorates', function () {
+return response()->json( [
+    'Damascus',
+    'Rif Dimashq',
+    'Aleppo',
+    'Homs',
+    'Hama',
+    'Latakia',
+    'Tartus',
+    'Idlib',
+    'Deir ez-Zor',
+    'Raqqa',
+    'Hasakah',
+    'Daraa',
+    'As-Suwayda',
+    'Quneitra',
+]);
+
+});
