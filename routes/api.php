@@ -83,13 +83,14 @@ Route::middleware(['jwt.auth', 'role:owner'])->group(function () {
 /*
 Renter Routes
 */
-Route::middleware(['jwt.auth', 'role:renter'])->prefix("renter")->group(function () {
-    Route::post('/bookings/{apartmentId}', [BookingController::class, 'store']);
-    Route::get('/bookings/pending',[BookingController::class,'renterPending']);
-    Route::get('/bookings/approved',[BookingController::class,'renterApproved']);
-   Route::get('/bookings/cancelled',[BookingController::class,'renterCancelled']);
-    Route::get('/bookings/past',[BookingController::class,'renterPast']);
-
+Route::middleware(['jwt.auth', 'role:renter'])->group(function () {
+    Route::post('/my/bookings/{apartmentId}', [BookingController::class, 'store']);
+    Route::group(['prefix' => 'renter'], function () {
+        Route::get('/bookings/pending', [BookingController::class, 'renterPending']);
+        Route::get('/bookings/approved', [BookingController::class, 'renterApproved']);
+        Route::get('/bookings/cancelled', [BookingController::class, 'renterCancelled']);
+        Route::get('/bookings/past', [BookingController::class, 'renterPast']);
+    });
 });
 
 
