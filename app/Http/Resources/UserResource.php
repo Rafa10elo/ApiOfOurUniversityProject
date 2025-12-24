@@ -18,7 +18,8 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'birth_date' => $this->birth_date,
             'verification_state' => $this->verification_state,
-            'profile_image'=> $this->getMedia('profile_image')->map(function ($media) {
+            'role' => $this->role,
+          'profile_image'=> $this->getMedia('profile_image')->map(function ($media) {
                 return $media->getUrl();
             }),
         ];
@@ -26,7 +27,6 @@ class UserResource extends JsonResource
         if ($isAdmin) {
             $base['created_at'] = $this->created_at;
             $base['updated_at'] = $this->updated_at;
-            $base['role'] = $this->role;
             $base['id_image']= $this->getMedia('id_image')->map(function ($media) {
                 return $media->getUrl();
             });

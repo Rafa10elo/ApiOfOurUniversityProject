@@ -19,9 +19,9 @@ class BookingController extends Controller
 
         $apartment = Apartment::findOrFail($apartmentId);
 
-        if ($apartment->owner_id == auth()->id()) {
+        if ($apartment->owner_id == auth()->id())
             return ApiHelper::error("You cannot book your own apartment", 400);
-        }
+
 
         $conflict = Booking::where('apartment_id', $apartmentId)
             ->where('status', 'approved')
@@ -35,9 +35,9 @@ class BookingController extends Controller
             })
             ->exists();
 
-        if ($conflict) {
+        if ($conflict)
             return ApiHelper::error("This date range is already booked", 409);
-        }
+
 
         $booking = Booking::create([
             'user_id'      => auth()->id(),
@@ -50,7 +50,7 @@ class BookingController extends Controller
 
         $apartment->owner->notify(new \App\Notifications\NewBookingNotification($booking));
 
-        return ApiHelper::success("Booking request sent", new BookingResource($booking), 201);
+        return ApiHelper::success("Booking request sent", new BookingResource($booking->load(['user','apartment'])), 201);
     }
 
 
@@ -83,7 +83,7 @@ class BookingController extends Controller
 
         $booking->user->notify(new \App\Notifications\BookingStatusNotification($booking));
 
-        return ApiHelper::success("Booking approved", new BookingResource($booking));
+        return ApiHelper::success("Booking approved", new BookingResource($booking->load(['user','apartment'])));
     }
 
 
@@ -99,7 +99,7 @@ class BookingController extends Controller
 
         $booking->user->notify(new \App\Notifications\BookingStatusNotification($booking));
 
-        return ApiHelper::success("Booking rejected", new BookingResource($booking));
+        return ApiHelper::success("Booking rejected", new BookingResource($booking->load(['user','apartment'])));
     }
     public function update(UpdateBookingRequest $request, $id)
     {
@@ -145,12 +145,13 @@ class BookingController extends Controller
             $booking->user->notify(new \App\Notifications\BookingStatusNotification($booking));
         }
 
-        return ApiHelper::success("Booking updated", new \App\Http\Resources\BookingResource($booking));
+        return ApiHelper::success("Booking updated", new BookingResource($booking->load(['user','apartment'])));
     }
 
     public function ownerPending()
     {
-        $bookings = Booking::whereHas('apartment', fn($q) =>
+        $bookings = Booking::with(['user','apartment'])
+            ->whereHas('apartment', fn($q) =>
         $q->where('owner_id', auth()->id())
         )->where('status', 'pending')->get();
 
@@ -162,7 +163,8 @@ class BookingController extends Controller
 
     public function ownerApproved()
     {
-        $bookings = Booking::whereHas('apartment', fn($q) =>
+        $bookings = Booking::with(['user','apartment'])
+            ->whereHas('apartment', fn($q) =>
         $q->where('owner_id', auth()->id())
         )->where('status', 'approved')
             ->where('end_date', '>=', date('Y-m-d'))
@@ -176,7 +178,8 @@ class BookingController extends Controller
 
     public function ownerCancelled()
     {
-        $bookings = Booking::whereHas('apartment', fn($q) =>
+        $bookings = Booking::with(['user','apartment'])
+            ->whereHas('apartment', fn($q) =>
         $q->where('owner_id', auth()->id())
         )->whereIn('status', ['cancelled','rejected'])->get();
 
@@ -188,7 +191,8 @@ class BookingController extends Controller
 
     public function ownerPast()
     {
-        $bookings = Booking::whereHas('apartment', fn($q) =>
+        $bookings = Booking::with(['user','apartment'])
+            ->whereHas('apartment', fn($q) =>
         $q->where('owner_id', auth()->id())
          )->where('status','approved')
              ->where('end_date','<',date('Y-m-d'))
@@ -204,7 +208,8 @@ class BookingController extends Controller
 
     public function renterPending()
     {
-        $bookings = Booking::where('user_id', auth()->id())
+        $bookings = Booking::with(['user','apartment'])
+            ->where('user_id', auth()->id())
             ->where('status','pending')->get();
 
             return ApiHelper::success(
@@ -215,7 +220,8 @@ class BookingController extends Controller
 
     public function renterApproved()
     {
-        $bookings = Booking::where('user_id', auth()->id())
+        $bookings = Booking::with(['user','apartment'])
+            ->where('user_id', auth()->id())
             ->where('status','approved')
             ->where('end_date','>=',date('Y-m-d'))
             ->get();
@@ -228,7 +234,8 @@ class BookingController extends Controller
 
     public function renterCancelled()
     {
-        $bookings = Booking::where('user_id', auth()->id())
+        $bookings = Booking::with(['user','apartment'])
+            ->where('user_id', auth()->id())
             ->whereIn('status',['cancelled','rejected'])->get();
 
         return ApiHelper::success(
@@ -239,7 +246,8 @@ class BookingController extends Controller
 
     public function renterPast()
     {
-        $bookings = Booking::where('user_id', auth()->id())
+        $bookings = Booking::with(['user','apartment'])
+            ->where('user_id', auth()->id())
             ->where('status','approved')
           ->where('end_date','<',date('Y-m-d'))
             ->get();
@@ -256,7 +264,8 @@ class BookingController extends Controller
     {
         $today = date('Y-m-d');
 
-        $bookings = Booking::where('apartment_id', $apartmentId)
+        $bookings = Booking::with(['user','apartment'])
+            ->where('apartment_id', $apartmentId)
             ->select('start_date', 'end_date', 'status')
             ->get()
           ->map(function ($booking) use ($today) {
