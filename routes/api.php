@@ -68,24 +68,28 @@ Route::middleware(['jwt.auth', 'role:owner'])->group(function () {
     Route::put('/apartments/{id}', [ApartmentController::class, 'update']);
     Route::delete('/apartments/{id}', [ApartmentController::class, 'destroy']);
 
+
+
     Route::post('/bookings/{id}/approve', [BookingController::class, 'approve']);
     Route::post('/bookings/{id}/reject', [BookingController::class, 'reject']);
-    Route::get('/bookings/pending',[BookingController::class,'ownerPending']);
-    Route::get('/bookings/approved',[BookingController::class,'ownerApproved']);
-   Route::get('/bookings/cancelled',[BookingController::class,'ownerCancelled']);
-   Route::get('/bookings/past',[BookingController::class,'ownerPast']);
+    Route::group(['prefix' => 'owner'], function () {
+    Route::get('/bookings/pending', [BookingController::class, 'ownerPending']);
+    Route::get('/bookings/approved', [BookingController::class, 'ownerApproved']);
+    Route::get('/bookings/cancelled', [BookingController::class, 'ownerCancelled']);
+    Route::get('/bookings/past', [BookingController::class, 'ownerPast']);
+});
 });
 
 /*
 Renter Routes
 */
-Route::middleware(['jwt.auth', 'role:renter'])->prefix("my")->group(function () {
+Route::middleware(['jwt.auth', 'role:renter'])->prefix("renter")->group(function () {
     Route::post('/bookings/{apartmentId}', [BookingController::class, 'store']);
     Route::get('/bookings/pending',[BookingController::class,'renterPending']);
     Route::get('/bookings/approved',[BookingController::class,'renterApproved']);
    Route::get('/bookings/cancelled',[BookingController::class,'renterCancelled']);
     Route::get('/bookings/past',[BookingController::class,'renterPast']);
-    
+
 });
 
 
