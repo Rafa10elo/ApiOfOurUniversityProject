@@ -246,11 +246,11 @@ class BookingController extends Controller
         $user = auth()->user();
 
         if ($booking->user_id !== $user->id) {
-            return ApiHelper::error("Not authorized", 403);
+            return ApiHelper::error("not authorized", 403);
         }
 
         if ($booking->status !== 'pending') {
-            return ApiHelper::error("Only pending bookings can be updated", 400);
+            return ApiHelper::error("only pending bookings can be updated", 400);
         }
 
         $start = $request->start_date ?? $booking->start_date;
