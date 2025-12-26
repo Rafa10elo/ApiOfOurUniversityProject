@@ -50,7 +50,7 @@ class BookingController extends Controller
 
         $apartment->owner->notify(new \App\Notifications\NewBookingNotification($booking));
 
-        return ApiHelper::success("Booking request sent", new BookingResource($booking->load(['user','apartment'])), 201);
+        return ApiHelper::success("booking request sent", new BookingResource($booking->load(['user','apartment'])), 201);
     }
 
 
@@ -76,14 +76,14 @@ class BookingController extends Controller
             ->exists();
 
         if ($conflict) {
-            return ApiHelper::error("This booking conflicts with an existing approved booking", 410);
+            return ApiHelper::error("this booking conflicts with an existing approved booking", 410);
         }
 
         $booking->update(['status' => 'approved']);
 
         $booking->user->notify(new \App\Notifications\BookingStatusNotification($booking));
 
-        return ApiHelper::success("Booking approved", new BookingResource($booking->load(['user','apartment'])));
+        return ApiHelper::success("booking approved", new BookingResource($booking->load(['user','apartment'])));
     }
 
 
@@ -92,7 +92,7 @@ class BookingController extends Controller
         $booking = Booking::findOrFail($id);
 
         if ($booking->apartment->owner_id !== auth()->id()) {
-            return ApiHelper::error("Not authorized", 403);
+            return ApiHelper::error("not authorized", 403);
         }
 
         $booking->update(['status' => 'rejected']);
@@ -101,52 +101,7 @@ class BookingController extends Controller
 
         return ApiHelper::success("Booking rejected", new BookingResource($booking->load(['user','apartment'])));
     }
-    public function update(UpdateBookingRequest $request, $id)
-    {
-        $booking = Booking::findOrFail($id);
 
-        $user = auth()->user();
-
-        if ($request->has('status')) {
-            if ($booking->apartment->owner_id !== $user->id) {
-                return ApiHelper::error("Not authorized to change status", 403);
-            }
-        }
-
-        if ($request->hasAny(['start_date', 'end_date'])) {
-            if ($booking->user_id !== $user->id) {
-                return ApiHelper::error("Not authorized to change booking dates", 403);
-            }
-
-            $start = $request->start_date ?? $booking->start_date;
-            $end   = $request->end_date ?? $booking->end_date;
-
-            $conflict = Booking::where('apartment_id', $booking->apartment_id)
-                ->where('id', '!=', $booking->id)
-                ->where('status', 'approved')
-                ->where(function ($q) use ($start, $end) {
-                    $q->whereBetween('start_date', [$start, $end])
-                        ->orWhereBetween('end_date', [$start, $end])
-                        ->orWhere(function ($q2) use ($start, $end) {
-                            $q2->where('start_date', '<=', $start)
-                                ->where('end_date', '>=', $end);
-                        });
-                })
-                ->exists();
-
-            if ($conflict) {
-                return ApiHelper::error("This date range conflicts with an existing approved booking", 409);
-            }
-        }
-
-        $booking->update($request->validated());
-
-        if ($request->has('status')) {
-            $booking->user->notify(new \App\Notifications\BookingStatusNotification($booking));
-        }
-
-        return ApiHelper::success("Booking updated", new BookingResource($booking->load(['user','apartment'])));
-    }
 
     public function ownerPending()
     {
@@ -156,7 +111,7 @@ class BookingController extends Controller
         )->where('status', 'pending')->get();
 
         return ApiHelper::success(
-            "Owner pending bookings",
+            "owner pending bookings",
             BookingResource::collection($bookings)
         );
     }
@@ -285,7 +240,68 @@ class BookingController extends Controller
             "Apartment calendar",$bookings
         );
     }
+    public function update(UpdateBookingRequest $request, $id)
+    {
+        $booking = Booking::findOrFail($id);
+        $user = auth()->user();
 
+        if ($booking->user_id !== $user->id) {
+            return ApiHelper::error("Not authorized", 403);
+        }
+
+        if ($booking->status !== 'pending') {
+            return ApiHelper::error("Only pending bookings can be updated", 400);
+        }
+
+        $start = $request->start_date ?? $booking->start_date;
+        $end   = $request->end_date   ?? $booking->end_date;
+
+        $conflict = Booking::where('apartment_id', $booking->apartment_id)
+            ->where('id', '!=', $booking->id)
+            ->where('status', 'approved')
+            ->where(function ($q) use ($start, $end) {
+                $q->whereBetween('start_date', [$start, $end])
+                    ->orWhereBetween('end_date', [$start, $end])
+                    ->orWhere(function ($q2) use ($start, $end) {
+                        $q2->where('start_date', '<=', $start)
+                            ->where('end_date', '>=', $end);
+                    });
+            })
+            ->exists();
+
+        if ($conflict)
+            return ApiHelper::error("this date range is already booked", 409);
+
+
+        $booking->update([
+            'start_date' => $start,
+            'end_date'   => $end,
+        ]);
+
+        return ApiHelper::success(
+            "booking updated successfully",
+            new BookingResource($booking->load(['user','apartment']))
+        );
+    }
+
+    public function cancel($id)
+    {
+        $booking = Booking::findOrFail($id);
+        $user = auth()->user();
+
+        if ($booking->user_id !== $user->id) return ApiHelper::error("not authorized", 403);
+
+
+        if ($booking->status !== 'pending') return ApiHelper::error("only pending bookings can be cancelled", 400);
+
+
+        $booking->update(['status' => 'cancelled']);
+
+        return ApiHelper::success(
+            "booking cancelled successfully",
+            new BookingResource($booking->load(['user','apartment']))
+        );
+    }
 
 }
 

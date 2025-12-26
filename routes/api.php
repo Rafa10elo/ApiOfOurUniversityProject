@@ -90,6 +90,8 @@ Route::middleware(['jwt.auth', 'role:renter'])->group(function () {
         Route::get('/bookings/approved', [BookingController::class, 'renterApproved']);
         Route::get('/bookings/cancelled', [BookingController::class, 'renterCancelled']);
         Route::get('/bookings/past', [BookingController::class, 'renterPast']);
+        Route::put('/bookings/{id}', [BookingController::class, 'update']);
+        Route::delete('/bookings/{id}', [BookingController::class, 'cancel']);
     });
 });
 
