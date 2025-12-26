@@ -245,29 +245,28 @@ class BookingController extends Controller
         $booking = Booking::findOrFail($id);
         $user = auth()->user();
 
-        if ($booking->user_id !== $user->id) {
+        if ($booking->user_id !== $user->id)
             return ApiHelper::error("not authorized", 403);
-        }
+
 
         $start = $request->start_date ??$booking->start_date;
         $end   = $request->end_date   ??$booking->end_date;
 
         $conflict = Booking::where('apartment_id', $booking->apartment_id)
             ->where('id', '!=', $booking->id)
-            ->where('status', 'approved')
-            ->where(function ($q) use ($start, $end) {
+             ->where('status', 'approved')
+              ->where(function ($q) use ($start, $end) {
                 $q->whereBetween('start_date', [$start, $end])
                     ->orWhereBetween('end_date', [$start, $end])
-                    ->orWhere(function ($q2) use ($start, $end) {
+                     ->orWhere(function ($q2) use ($start, $end) {
                         $q2->where('start_date', '<=', $start)
                             ->where('end_date', '>=', $end);
                     });
-            })
-            ->exists();
+            })->exists();
 
-        if ($conflict) {
-            return ApiHelper::error("this date range is already booked", 409);
-        }
+        if ($conflict)
+            return ApiHelper::error("this date range is already booked",409);
+
 
         $booking->update([
             'start_date' => $start,
@@ -280,7 +279,7 @@ class BookingController extends Controller
         );
 
         return ApiHelper::success(
-            "booking updated, waiting for owner approval",
+            "booking updated..... waiting for owner approval",
             new BookingResource($booking->load(['user','apartment']))
         );
     }
