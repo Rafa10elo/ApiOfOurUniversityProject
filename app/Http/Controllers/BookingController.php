@@ -249,10 +249,6 @@ class BookingController extends Controller
             return ApiHelper::error("not authorized", 403);
         }
 
-        if ($booking->status !== 'pending') {
-            return ApiHelper::error("only pending bookings can be updated", 400);
-        }
-
         $start = $request->start_date ?? $booking->start_date;
         $end   = $request->end_date   ?? $booking->end_date;
 
@@ -269,17 +265,22 @@ class BookingController extends Controller
             })
             ->exists();
 
-        if ($conflict)
+        if ($conflict) {
             return ApiHelper::error("this date range is already booked", 409);
-
+        }
 
         $booking->update([
             'start_date' => $start,
             'end_date'   => $end,
+            'status'     => 'pending',
         ]);
 
+        $booking->apartment->owner->notify(
+            new \App\Notifications\BookingUpdatedNotification($booking)
+        );
+
         return ApiHelper::success(
-            "booking updated successfully",
+            "booking updated, waiting for owner approval",
             new BookingResource($booking->load(['user','apartment']))
         );
     }
