@@ -249,8 +249,8 @@ class BookingController extends Controller
             return ApiHelper::error("not authorized", 403);
         }
 
-        $start = $request->start_date ?? $booking->start_date;
-        $end   = $request->end_date   ?? $booking->end_date;
+        $start = $request->start_date ??$booking->start_date;
+        $end   = $request->end_date   ??$booking->end_date;
 
         $conflict = Booking::where('apartment_id', $booking->apartment_id)
             ->where('id', '!=', $booking->id)
