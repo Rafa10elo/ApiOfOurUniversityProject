@@ -47,7 +47,7 @@ class BookingController extends Controller
             'status' => 'pending',
 
         ]);
-
+        $booking->load('user');
         $apartment->owner->notify(new \App\Notifications\NewBookingNotification($booking));
 
         return ApiHelper::success("booking request sent", new BookingResource($booking->load(['user','apartment'])), 201);
@@ -280,6 +280,7 @@ class BookingController extends Controller
 
         if ($conflict)
             return ApiHelper::error("this date range is already booked",409);
+        $booking->load('user');
 
         if($booking->status === 'approved')
         $booking->apartment->owner->notify(new \App\Notifications\BookingUpdatedNotification($booking));
