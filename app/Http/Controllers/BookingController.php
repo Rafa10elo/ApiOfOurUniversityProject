@@ -81,6 +81,20 @@ class BookingController extends Controller
 
         $booking->update(['status' => 'approved']);
 
+        Booking::where('apartment_id', $booking->apartment_id)
+            ->where('id', '!=', $booking->id)
+            ->where('status', 'pending')
+            ->where(function ($q) use ($booking) {
+                $q->whereBetween('start_date', [$booking->start_date, $booking->end_date])
+                    ->orWhereBetween('end_date', [$booking->start_date, $booking->end_date])
+                    ->orWhere(function ($q2) use ($booking) {
+                        $q2->where('start_date', '<=', $booking->start_date)
+                            ->where('end_date', '>=', $booking->end_date);
+                    });
+            })
+            ->update(['status' => 'cancelled']);
+
+
         $booking->user->notify(new \App\Notifications\BookingStatusNotification($booking));
 
         return ApiHelper::success("booking approved", new BookingResource($booking->load(['user','apartment'])));
@@ -249,8 +263,8 @@ class BookingController extends Controller
             return ApiHelper::error("not authorized", 403);
 
 
-        $start = $request->start_date ??$booking->start_date;
-        $end   = $request->end_date   ??$booking->end_date;
+        $start = $request->start_date;
+        $end   = $request->end_date;
 
         $conflict = Booking::where('apartment_id', $booking->apartment_id)
             ->where('id', '!=', $booking->id)

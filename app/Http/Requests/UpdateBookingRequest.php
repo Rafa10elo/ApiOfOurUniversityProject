@@ -14,7 +14,7 @@ class UpdateBookingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'start_date' => 'sometimes|date',
+            'start_date' => 'sometimes|date|after_or_equal:today',
             'end_date'   => 'sometimes|date|after_or_equal:start_date',
             'status'     => 'sometimes|in:pending,approved,rejected,cancelled',
         ];
