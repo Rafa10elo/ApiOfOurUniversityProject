@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reverb + Pusher Test</title>
+</head>
+<body>
+<h2>Reverb + Pusher Channels Test</h2>
+<pre id="log"></pre>
+
+<script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+<script>
+const log = msg => {
+    document.getElementById('log').textContent += msg + "\n";
+};
+
+// JWT تبع المستخدم
+const JWT_TOKEN = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vMTI3LjAuMC4xOjgwMDAvYXBpL2F1dGgvbG9naW4iLCJpYXQiOjE3NjczNjcwMTYsImV4cCI6MTc2NzM3MDYxNiwibmJmIjoxNzY3MzY3MDE2LCJqdGkiOiJCc0Z4dmhGRVpGbjgzRzk5Iiwic3ViIjoiMyIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.x95mn9wYlen9zjIp1_GKbbv8UiyueQVMwy_PcXFB1gA"
+
+// إنشاء اتصال Pusher
+const pusher = new Pusher("local-key", {
+    wsHost: "127.0.0.1",
+    wsPort: 8080,
+    forceTLS: false,
+    cluster: "mt1",
+    enabledTransports: ["ws"],
+    authEndpoint: "/api/broadcasting/auth",
+    auth: {
+        headers: {
+            Authorization: "Bearer " + JWT_TOKEN
+        }
+    }
+});
+
+// =======================
+// Conversation Channel
+// =======================
+const conversationChannel = pusher.subscribe("private-conversation.3");
+
+conversationChannel.bind("pusher:subscription_succeeded", () => {
+    log("✅ Subscribed to private-conversation.3");
+});
+
+conversationChannel.bind_global((event, data) => {
+    log(`💬 [Conversation] ${event}: ${JSON.stringify(data)}`);
+});
+
+// =======================
+// Notifications Channel
+// =======================
+const notificationChannel = pusher.subscribe("private-App.Models.User.3");
+
+notificationChannel.bind("pusher:subscription_succeeded", () => {
+    log("🔔 Subscribed to private-App.Models.User.3");
+});
+
+notificationChannel.bind_global((event, data) => {
+    log(`🔔 [Notification] ${event}: ${JSON.stringify(data)}`);
+});
+
+// =======================
+// Connection events
+// =======================
+pusher.connection.bind("connected", () => {
+    log("🟢 WebSocket connected");
+});
+
+pusher.connection.bind("error", err => {
+    log("🔴 Connection error: " + JSON.stringify(err));
+});
+</script>
+</body>
+</html>

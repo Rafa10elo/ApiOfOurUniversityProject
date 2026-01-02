@@ -41,6 +41,8 @@ return [
                 'scheme' => env('REVERB_SCHEME', 'https'),
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
             ],
+            'default' => env('BROADCAST_CONNECTION', 'reverb'),
+
             'client_options' => [
             ],
         ],

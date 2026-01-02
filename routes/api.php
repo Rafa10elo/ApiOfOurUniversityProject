@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\AdminViewController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\MessageController;
 use App\Http\Controllers\ReviewController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
@@ -9,22 +11,68 @@ use App\Http\Controllers\EditProfileController;
 use App\Http\Controllers\ApartmentController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\NotificationController;
+use Illuminate\Support\Facades\Broadcast;
+use Illuminate\Http\Request;
+
 
 //reverb weow weow
-Route::post('/broadcasting/auth', function (Illuminate\Http\Request $request) {
+//Route::post('/broadcasting/auth', function (Request $request) {
+//    \Log::info('Auth request', [
+//        'socket_id' => $request->socket_id,
+//        'channel' => $request->channel_name
+//    ]);
+//
+//    try {
+//        $user = JWTAuth::parseToken()->authenticate();
+//
+//        $channelName = $request->channel_name;
+//
+//        $authorized = false;
+//        if (str_starts_with($channelName, 'private-conversation.')) {
+//            $conversationId = explode('.', $channelName)[1];
+//            $authorized = \DB::table('conversation_user')
+//                ->where('conversation_id', $conversationId)
+//                ->where('user_id', $user->id)
+//                ->exists();
+//        } elseif (str_starts_with($channelName, 'private-user.')) {
+//            $userId = explode('.', $channelName)[1];
+//            $authorized = ((int)$userId === $user->id);
+//        }
+//
+//        if (!$authorized)
+//            return response()->json(['error' => 'not authorized'], 403);
+//
+//
+//        $channelData = json_encode([
+//            'user_id' => (string)$user->id,
+//            'user_info' => [
+//                'id' => (string)$user->id,
+//                'name' => $user->name ?? 'User'
+//            ]
+//        ]);
+//
+//        $stringToSign = $request->socket_id.':'.$channelName.':'.$channelData;
+//        $auth = hash_hmac('sha256',$stringToSign, 'local-secret', false);
+//
+//        return response()->json([
+//            'auth' => $auth,
+//            'channel_data' => $channelData
+//        ]);
+//
+//    } catch (Exception $e) {
+//        return response()->json(['error' => 'unauthorized'], 401);
+//    }
+//});
 
-    $user = auth('api')->user();
 
-    if (! $user) {
-        return response()->json(['message' => 'Unauthenticated'], 401);
-    }
+Route::post('/broadcasting/auth', function (Request $request) {
+
+    $user = JWTAuth::parseToken()->authenticate();
+    auth()->setUser($user);
 
     return Broadcast::auth($request);
-})->middleware('jwt.auth');
 
-/*
- Public Routes
-*/
+});
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
 
@@ -38,6 +86,17 @@ Route::get('/apartments/{apartmentId}/reviews', [ReviewController::class, 'index
 Authenticated Routes
 */
 Route::middleware(['jwt.auth'])->group(function () {
+
+    Route::get('/conversations', [ConversationController::class, 'index']);
+    Route::post('/conversations', [ConversationController::class, 'store']);
+    Route::get('/conversations/{id}', [ConversationController::class, 'show']);
+
+
+    Route::get('/conversations/{conversationId}/messages', [MessageController::class, 'index']);
+
+    Route::post('/conversations/{conversationId}/messages', [MessageController::class, 'store']);
+
+
 
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
