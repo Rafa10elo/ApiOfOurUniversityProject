@@ -23,26 +23,24 @@ class MessageController extends Controller
         return response()->json($messages);
     }
 
-
-    public function store(Request $request)
+    public function store(Request $request, $conversationId)
     {
         $request->validate([
-            'conversation_id' => 'required|exists:conversations,id',
             'message' => 'required|string'
         ]);
 
-        $isMember = \DB::table('conversation_user')
-            ->where('conversation_id', $request->conversation_id)
+        $isMember = DB::table('conversation_user')
+            ->where('conversation_id', $conversationId)
             ->where('user_id', auth()->id())
-          ->exists();
+            ->exists();
 
         if (! $isMember) {
             return response()->json(['message' => 'Forbidden'], 403);
         }
 
         $message = Message::create([
-            'conversation_id' => $request->conversation_id,
-         'sender_id' => auth()->id(),
+            'conversation_id' => $conversationId,
+            'sender_id' => auth()->id(),
             'message' => $request->message
         ]);
 
@@ -50,4 +48,5 @@ class MessageController extends Controller
 
         return response()->json($message, 201);
     }
+
 }
