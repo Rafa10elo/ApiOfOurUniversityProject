@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ApiHelper;
+use App\Http\Requests\StoreConversationRequest;
+use App\Http\Resources\ConversationResource;
 use App\Models\Conversation;
 use Illuminate\Http\Request;
 
@@ -17,22 +20,22 @@ class ConversationController extends Controller
            ->latest()
             ->get();
 
-        return response()->json($conversations);
+        $conversations->load('users');
+        return ApiHelper::success("those are the conversations" , ConversationResource::collection($conversations));
+
     }
 
-    public function store(Request $request)
+    public function store(StoreConversationRequest $request)
     {
-        $request->validate([
-          'user_id' => 'required|exists:users,id'
-        ]);
 
-        $conversation = Conversation::where('type', 'private')
+        $conversation = Conversation::where('type','private')
             ->whereHas('users', fn ($q) => $q->where('users.id', auth()->id()))
            ->whereHas('users', fn ($q) => $q->where('users.id', $request->user_id))
             ->first();
 
         if ($conversation) {
-            return response()->json($conversation);
+            $conversation->load('users');
+            return ApiHelper::success("conversation created",new ConversationResource($conversation));
         }
 
         $conversation = Conversation::create(['type' => 'private']);
@@ -42,7 +45,8 @@ class ConversationController extends Controller
           $request->user_id
         ]);
 
-        return response()->json($conversation, 201);
+        $conversation->load('users');
+        return ApiHelper::success("conversation created",new ConversationResource($conversation));
     }
 
 
@@ -54,6 +58,8 @@ class ConversationController extends Controller
             ->with('users:id,first_name')
             ->findOrFail($id);
 
-        return response()->json($conversation);
+
+        $conversation->load('users');
+        return ApiHelper::success("this is the conversation" , new ConversationResource($conversation));
     }
 }

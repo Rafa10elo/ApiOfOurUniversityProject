@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Events\MessageSent;
+use App\Helpers\ApiHelper;
+use App\Http\Requests\StoreMessageRequest;
+use App\Http\Resources\MessageResource;
 use App\Models\Message;
 use App\Models\Conversation;
 use Illuminate\Http\Request;
@@ -20,22 +23,19 @@ class MessageController extends Controller
             ->orderBy('created_at', 'asc')
             ->paginate(20);
 
-        return response()->json($messages);
+        return ApiHelper::success("Those are the messages of the conversation",messageResource::collection($messages));
     }
 
-    public function store(Request $request, $conversationId)
+    public function store(StoreMessageRequest $request, $conversationId)
     {
-        $request->validate([
-            'message' => 'required|string'
-        ]);
 
-        $isMember = DB::table('conversation_user')
+        $isMember = \DB::table('conversation_user')
             ->where('conversation_id', $conversationId)
             ->where('user_id', auth()->id())
             ->exists();
 
         if (! $isMember) {
-            return response()->json(['message' => 'Forbidden'], 403);
+            return ApiHelper::error("You can't send message to this convo", 401);
         }
 
         $message = Message::create([
@@ -46,7 +46,7 @@ class MessageController extends Controller
 
         broadcast(new MessageSent($message))->toOthers();
 
-        return response()->json($message, 201);
+        return ApiHelper::success('message sent' , new MessageResource($message));
     }
 
 }
