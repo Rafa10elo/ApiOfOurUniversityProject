@@ -67,7 +67,7 @@ use Illuminate\Http\Request;
 
 Route::post('/broadcasting/auth', function (Request $request) {
 
-    $user = JWTAuth::parseToken()->authenticate();
+    $user =JWTAuth::parseToken()->authenticate();
     auth()->setUser($user);
 
     return Broadcast::auth($request);
@@ -79,13 +79,13 @@ Route::post('/auth/login', [AuthController::class, 'login']);
 Route::get('/apartments', [ApartmentController::class, 'index']);
 Route::get('/apartments/top-rated', [ApartmentController::class, 'topRated']);
 Route::get('/apartments/{id}', [ApartmentController::class, 'show']);
-Route::get('/apartments/{apartmentId}/reviews', [ReviewController::class, 'index']);
+  Route::get('/apartments/{apartmentId}/reviews', [ReviewController::class, 'index']);
  Route::get('/apartments/{id}/calendar',[BookingController::class,'apartmentCalendar']);
 
 /*
 Authenticated Routes
 */
-Route::middleware(['jwt.auth'])->group(function () {
+Route::middleware(['jwt.auth', 'block.pending'])->group(function () {
 
     Route::get('/conversations', [ConversationController::class, 'index']);
     Route::post('/conversations', [ConversationController::class, 'store']);
@@ -121,7 +121,7 @@ Route::middleware(['jwt.auth'])->group(function () {
 /*
 Owner Routes
 */
-Route::middleware(['jwt.auth', 'role:owner'])->group(function () {
+Route::middleware(['jwt.auth', 'role:owner', 'block.pending'])->group(function () {
 
     Route::post('/apartments', [ApartmentController::class, 'store']);
     Route::put('/apartments/{id}', [ApartmentController::class, 'update']);
@@ -142,7 +142,7 @@ Route::middleware(['jwt.auth', 'role:owner'])->group(function () {
 /*
 Renter Routes
 */
-Route::middleware(['jwt.auth', 'role:renter'])->group(function () {
+Route::middleware(['jwt.auth', 'role:renter', 'block.pending'])->group(function () {
     Route::post('/my/bookings/{apartmentId}', [BookingController::class, 'store']);
     Route::group(['prefix' => 'renter'], function () {
         Route::get('/bookings/pending', [BookingController::class, 'renterPending']);

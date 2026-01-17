@@ -9,8 +9,8 @@ class ApartmentResource extends JsonResource
     public function toArray($request): array
     {
         return [
-            'id' => $this->id,
-            'owner' => new UserResource($this->owner),
+            'id' =>$this->id,
+            'owner'=> new UserResource($this->owner),
             'price' => $this->price,
             'city' => $this->city,
             'governorate' => $this->governorate,

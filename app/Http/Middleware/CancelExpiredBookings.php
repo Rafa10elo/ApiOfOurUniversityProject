@@ -14,12 +14,11 @@ class CancelExpiredBookings
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
      */
-    public function handle(Request $request, Closure $next): Response
+    public function handle(Request $request, Closure $next):Response
     {
-        Booking::where('status', 'pending')
-            ->where('start_date', '<', now()->toDateString())
+        Booking::where('status','pending')
+            ->where('start_date','<', now()->toDateString())
             ->update(['status' => 'cancelled']);
-
-        return $next($request);
+       return $next($request);
     }
 }
