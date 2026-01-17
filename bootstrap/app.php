@@ -15,9 +15,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
+            'block.pending' => \App\Http\Middleware\EnsureUserIsApproved::class
         ]);
         $middleware->append(\App\Http\Middleware\CancelExpiredBookings::class);
-        $middleware->alias(['block.pending' => \App\Http\Middleware\EnsureUserIsApproved::class,]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //
